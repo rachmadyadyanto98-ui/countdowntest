@@ -23,14 +23,6 @@
       position: relative;
     }
 
-    .technic {
-      position: relative;
-    }
-
-    .bobbin {
-      position: relative;
-    }
-
     .divider {
       width: 4px;
       background-color: #555;
@@ -43,6 +35,12 @@
 
     .countdown-blue {
       color: #3399FF;
+    }
+
+    .next-time {
+      font-size: 0.5em;
+      margin-top: 10px;
+      color: #ccc;
     }
 
     .watermark {
@@ -69,11 +67,13 @@
 <body>
   <div class="section technic">
     <div id="countdown-technic" class="countdown-red">Menunggu...</div>
+    <div id="next-technic" class="next-time"></div>
     <div class="watermark-red">Technic</div>
   </div>
   <div class="divider"></div>
   <div class="section bobbin">
     <div id="countdown-bobbin" class="countdown-blue">Menunggu...</div>
+    <div id="next-bobbin" class="next-time"></div>
     <div class="watermark">BOBBIN</div>
   </div>
 
@@ -92,6 +92,8 @@
 
     const countdownTechnic = document.getElementById("countdown-technic");
     const countdownBobbin = document.getElementById("countdown-bobbin");
+    const nextTechnic = document.getElementById("next-technic");
+    const nextBobbin = document.getElementById("next-bobbin");
 
     function parseTimeToDate(timeStr) {
       const [hour, minute] = timeStr.split(":").map(Number);
@@ -133,12 +135,15 @@
           const minutes = Math.floor(remaining / 60);
           const seconds = remaining % 60;
           countdownTechnic.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+          nextTechnic.textContent = "";
         } else {
           countdownTechnic.textContent = "00:00";
+          nextTechnic.textContent = "";
         }
       } else {
         const next = getNextStart(now, technicTimes);
-        countdownTechnic.textContent = next ? `Menunggu ${next}` : "Selesai";
+        countdownTechnic.textContent = next ? "Menunggu..." : "Selesai";
+        nextTechnic.textContent = next ? `Jam berikutnya: ${next}` : "";
       }
 
       // Bobbin
@@ -150,12 +155,15 @@
           const minutes = Math.floor(remaining / 60);
           const seconds = remaining % 60;
           countdownBobbin.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+          nextBobbin.textContent = "";
         } else {
           countdownBobbin.textContent = "00:00";
+          nextBobbin.textContent = "";
         }
       } else {
         const next = getNextStart(now, bobbinTimes);
-        countdownBobbin.textContent = next ? `Menunggu ${next}` : "Selesai";
+        countdownBobbin.textContent = next ? "Menunggu..." : "Selesai";
+        nextBobbin.textContent = next ? `Jam berikutnya: ${next}` : "";
       }
     }
 
