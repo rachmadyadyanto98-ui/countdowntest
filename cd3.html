@@ -19,7 +19,6 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      font-size: 3em;
       position: relative;
     }
 
@@ -27,6 +26,15 @@
       width: 4px;
       background-color: #555;
       height: 100vh;
+    }
+
+    .countdown-red,
+    .countdown-blue {
+      font-size: 5em; /* default kecil */
+    }
+
+    .countdown-active {
+      font-size: 20em; /* besar saat aktif */
     }
 
     .countdown-red {
@@ -43,24 +51,23 @@
       color: #ccc;
     }
 
-    .watermark {
+    .watermark,
+    .watermark-red {
       position: absolute;
-      font-size: 1em;
-      color: rgba(255, 255, 255, 0.2);
+      font-size: 6em;
+      font-weight: bold;
+      opacity: 0.2;
       bottom: 20px;
-      right: 20px;
       pointer-events: none;
       user-select: none;
     }
 
+    .watermark {
+      right: 20px;
+    }
+
     .watermark-red {
-      position: absolute;
-      font-size: 1em;
-      color: rgba(255, 255, 255, 0.3);
-      bottom: 20px;
       left: 20px;
-      pointer-events: none;
-      user-select: none;
     }
   </style>
 </head>
@@ -68,7 +75,7 @@
   <div class="section technic">
     <div id="countdown-technic" class="countdown-red">Menunggu...</div>
     <div id="next-technic" class="next-time"></div>
-    <div class="watermark-red">Technic</div>
+    <div class="watermark-red">TECHNIC</div>
   </div>
   <div class="divider"></div>
   <div class="section bobbin">
@@ -78,23 +85,21 @@
   </div>
 
   <script>
-    const duration = 15 * 60; // 15 menit dalam detik
+    const duration = 15 * 60;
 
-    
-const technicTimes = [
-  "08:30", "08:50", "09:10", "09:30",
-  "11:30", "11:50", "12:10", "12:30",
-  "15:15", "15:30", "15:45", "16:00",
-  "18:00", "18:45"
-];
+    const technicTimes = [
+      "08:30", "08:50", "09:10", "09:30",
+      "11:30", "11:50", "12:10", "12:30",
+      "15:15", "15:30", "15:45", "16:00",
+      "18:00", "18:45"
+    ];
 
-const bobbinTimes = [
-  "08:30", "08:50", "09:10", "09:30",
-  "11:30", "11:50", "12:10", "12:30",
-  "15:15", "15:35", "15:55", "16:15",
-  "17:30", "17:55"
-];
-
+    const bobbinTimes = [
+      "08:30", "08:50", "09:10", "09:30",
+      "11:30", "11:50", "12:10", "12:30",
+      "15:15", "15:35", "15:55", "16:15",
+      "17:30", "17:55"
+    ];
 
     const countdownTechnic = document.getElementById("countdown-technic");
     const countdownBobbin = document.getElementById("countdown-bobbin");
@@ -135,6 +140,7 @@ const bobbinTimes = [
       // Technic
       const technicStart = getActiveStart(now, technicTimes);
       if (technicStart) {
+        countdownTechnic.classList.add("countdown-active");
         const elapsed = Math.floor((now - technicStart) / 1000);
         const remaining = duration - elapsed;
         if (remaining >= 0) {
@@ -147,6 +153,7 @@ const bobbinTimes = [
           nextTechnic.textContent = "";
         }
       } else {
+        countdownTechnic.classList.remove("countdown-active");
         const next = getNextStart(now, technicTimes);
         countdownTechnic.textContent = next ? "Menunggu..." : "Selesai";
         nextTechnic.textContent = next ? `Jam berikutnya: ${next}` : "";
@@ -155,6 +162,7 @@ const bobbinTimes = [
       // Bobbin
       const bobbinStart = getActiveStart(now, bobbinTimes);
       if (bobbinStart) {
+        countdownBobbin.classList.add("countdown-active");
         const elapsed = Math.floor((now - bobbinStart) / 1000);
         const remaining = duration - elapsed;
         if (remaining >= 0) {
@@ -167,6 +175,7 @@ const bobbinTimes = [
           nextBobbin.textContent = "";
         }
       } else {
+        countdownBobbin.classList.remove("countdown-active");
         const next = getNextStart(now, bobbinTimes);
         countdownBobbin.textContent = next ? "Menunggu..." : "Selesai";
         nextBobbin.textContent = next ? `Jam berikutnya: ${next}` : "";
