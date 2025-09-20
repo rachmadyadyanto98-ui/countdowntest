@@ -3,73 +3,94 @@
 <head>
   <meta charset="UTF-8">
   <title>Split Countdown Technic & Bobbin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <style>
-    body {
+    html, body {
+      height: 100%;
       margin: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column; /* ubah jadi vertikal */
+      padding: 0;
+      background: #000;
+      color: #fff;
       font-family: Arial, sans-serif;
-      background-color: #000;
-      color: white;
+      overflow: hidden;
     }
-
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      justify-content: stretch;
+      align-items: stretch;
+    }
     .section {
-      flex: 1;
+      flex: 1 1 0;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       position: relative;
+      min-height: 0;
+      min-width: 0;
+      width: 100vw;
+      box-sizing: border-box;
     }
-
     .divider {
-      height: 4px; /* ubah jadi horizontal */
-      background-color: #555;
-      width: 100%;
+      height: 2vw;
+      min-height: 8px;
+      background: #555;
+      width: 100vw;
     }
-
     .countdown-red,
     .countdown-blue {
-      font-size: 5em;
+      font-size: 10vw;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+      text-shadow: 2px 2px 8px #000;
+      transition: font-size 0.2s;
+      user-select: none;
     }
-
     .countdown-active {
-      font-size: 15em;
+      font-size: 18vw;
     }
-
     .countdown-red {
       color: #FF3333;
     }
-
     .countdown-blue {
       color: #3399FF;
     }
-
     .next-time {
-      font-size: 1em;
-      margin-top: 10px;
+      font-size: 3vw;
+      margin-top: 2vw;
       color: #ccc;
+      text-shadow: 1px 1px 4px #000;
+      user-select: none;
     }
-
     .watermark,
     .watermark-red {
       position: absolute;
-      font-size: 6em;
+      font-size: 10vw;
       font-weight: bold;
-      opacity: 0.2;
+      opacity: 0.12;
       pointer-events: none;
       user-select: none;
+      z-index: 0;
+      white-space: nowrap;
     }
-
     .watermark-red {
-      top: 20px;
-      left: 20px;
+      top: 2vw;
+      left: 2vw;
+      color: #FF3333;
     }
-
     .watermark {
-      bottom: 20px;
-      right: 20px;
+      bottom: 2vw;
+      right: 2vw;
+      color: #3399FF;
+    }
+    @media (max-width: 600px) {
+      .countdown-red, .countdown-blue { font-size: 14vw; }
+      .countdown-active { font-size: 22vw; }
+      .next-time { font-size: 5vw; }
+      .watermark, .watermark-red { font-size: 16vw; }
     }
   </style>
 </head>
@@ -85,24 +106,20 @@
     <div id="next-bobbin" class="next-time"></div>
     <div class="watermark">BOBBIN</div>
   </div>
-
   <script>
     const duration = 15 * 60;
-
     const technicTimes = [
       "08:30", "08:50", "09:10", "09:30",
       "11:30", "11:50", "12:10", "12:30",
       "15:15", "15:30", "15:45", "16:00",
       "18:00", "18:45"
     ];
-
     const bobbinTimes = [
       "08:30", "08:50", "09:10", "09:30",
       "11:30", "11:50", "12:10", "12:30",
       "15:15", "15:35", "15:55", "16:15",
       "17:30", "17:55"
     ];
-
     const countdownTechnic = document.getElementById("countdown-technic");
     const countdownBobbin = document.getElementById("countdown-bobbin");
     const nextTechnic = document.getElementById("next-technic");
@@ -114,7 +131,6 @@
       date.setHours(hour, minute, 0, 0);
       return date;
     }
-
     function getActiveStart(now, timeList) {
       for (const timeStr of timeList) {
         const start = parseTimeToDate(timeStr);
@@ -125,7 +141,6 @@
       }
       return null;
     }
-
     function getNextStart(now, timeList) {
       for (const timeStr of timeList) {
         const start = parseTimeToDate(timeStr);
@@ -135,10 +150,9 @@
       }
       return null;
     }
-
     function updateCountdown() {
       const now = new Date();
-
+      // Technic
       const technicStart = getActiveStart(now, technicTimes);
       if (technicStart) {
         countdownTechnic.classList.add("countdown-active");
@@ -159,7 +173,7 @@
         countdownTechnic.textContent = next ? "Menunggu..." : "Selesai";
         nextTechnic.textContent = next ? `Jam berikutnya: ${next}` : "";
       }
-
+      // Bobbin
       const bobbinStart = getActiveStart(now, bobbinTimes);
       if (bobbinStart) {
         countdownBobbin.classList.add("countdown-active");
@@ -181,13 +195,25 @@
         nextBobbin.textContent = next ? `Jam berikutnya: ${next}` : "";
       }
     }
-
     function loop() {
       updateCountdown();
       requestAnimationFrame(loop);
     }
-
     loop();
+    // Optional: Prevent screen from sleeping (for some kiosk browsers)
+    if ('wakeLock' in navigator) {
+      let wakeLock = null;
+      const requestWakeLock = async () => {
+        try { wakeLock = await navigator.wakeLock.request('screen'); }
+        catch (err) {}
+      };
+      requestWakeLock();
+      document.addEventListener('visibilitychange', () => {
+        if (wakeLock !== null && document.visibilityState === 'visible') {
+          requestWakeLock();
+        }
+      });
+    }
   </script>
 </body>
 </html>
