@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Split Countdown Shift 1 & 2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      justify-content: stretch;
+      align-items: stretch;
+    }
+    .section {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      min-height: 0;
+      min-width: 0;
+      width: 100vw;
+      box-sizing: border-box;
+    }
+    .divider {
+      height: 2vw;
+      min-height: 8px;
+      background: #555;
+      width: 100vw;
+    }
+    .countdown {
+      font-size: 10vw;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+      text-shadow: 2px 2px 8px #000;
+      transition: font-size 0.2s;
+      user-select: none;
+    }
+    .countdown-active {
+      font-size: 18vw;
+    }
+    .next-time {
+      font-size: 3vw;
+      margin-top: 2vw;
+      color: #ccc;
+      text-shadow: 1px 1px 4px #000;
+      user-select: none;
+    }
+    .watermark {
+      position: absolute;
+      font-size: 10vw;
+      font-weight: bold;
+      opacity: 0.12;
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+      white-space: nowrap;
+      bottom: 2vw;
+      right: 2vw;
+    }
+    @media (max-width: 600px) {
+      .countdown { font-size: 14vw; }
+      .countdown-active { font-size: 22vw; }
+      .next-time { font-size: 5vw; }
+      .watermark { font-size: 16vw; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="section" id="packing">
+    <div id="countdown-packing" class="countdown" style="color:#FF9933">Menunggu...</div>
+    <div id="next-packing" class="next-time"></div>
+    <div class="watermark">PACKING</div>
+  </div>
+  <div class="divider"></div>
+
+  <div class="section" id="cigar">
+    <div id="countdown-cigar" class="countdown" style="color:#66FF66">Menunggu...</div>
+    <div id="next-cigar" class="next-time"></div>
+    <div class="watermark">CIGAR MAKING</div>
+  </div>
+  <div class="divider"></div>
+
+  <div class="section" id="technic">
+    <div id="countdown-technic" class="countdown" style="color:#3399FF">Menunggu...</div>
+    <div id="next-technic" class="next-time"></div>
+    <div class="watermark">TECHNIC</div>
+  </div>
+
+  <script>
+    const duration = 15 * 60;
+    const isFriday = new Date().getDay() === 5;
+
+    const shift1Times = [
+      "08:30", "08:50", "09:10", "09:30",
+      ...(isFriday ? ["11:30", "12:15"] : ["11:30", "11:50", "12:10", "12:30"])
+    ];
+
+    const shift2Times = [
+      "15:15", "15:35", "15:55", "16:15",
+      "17:30", "17:55"
+    ];
+
+    const departments = [
+      { id: "packing", times: shift1Times },
+      { id: "cigar", times: shift1Times },
+      { id: "technic", times: shift2Times }
+    ];
+
+    function parseTimeToDate(timeStr) {
+      const [hour, minute] = timeStr.split(":").map(Number);
+      const date = new Date();
+      date.setHours(hour, minute, 0, 0);
+      return date;
+    }
+
+    function getActiveStart(now, timeList) {
+      for (const timeStr of timeList) {
+        const start = parseTimeToDate(timeStr);
+        const end = new Date(start.getTime() + duration * 1000);
+        if (now >= start && now < end) {
+          return start;
+        }
+      }
+      return null;
+    }
+
+    function getNextStart(now, timeList) {
+      for (const timeStr of timeList) {
+        const start = parseTimeToDate(timeStr);
+        if (now < start) {
+          return timeStr;
+        }
+      }
+      return null;
+    }
+
+    function updateCountdown() {
+      const now = new Date();
+      departments.forEach(dept => {
+        const countdownEl = document.getElementById(`countdown-${dept.id}`);
+        const nextEl = document.getElementById(`next-${dept.id}`);
+        const activeStart = getActiveStart(now, dept.times);
+
+        if (activeStart) {
+          countdownEl.classList.add("countdown-active");
+          const elapsed = Math.floor((now - activeStart) / 1000);
+          const remaining = duration - elapsed;
+          const minutes = Math.floor(remaining / 60);
+          const seconds = remaining % 60;
+          countdownEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+          nextEl.textContent = "";
+        } else {
+          countdownEl.classList.remove("countdown-active");
+          const next = getNextStart(now, dept.times);
+          countdownEl.textContent = next ? "Menunggu..." : "Selesai";
+          nextEl.textContent = next ? `Jam berikutnya: ${next}` : "";
+        }
+      });
+    }
+
+    function loop() {
+      updateCountdown();
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+  </script>
+</body>
