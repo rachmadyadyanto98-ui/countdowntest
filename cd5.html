@@ -108,17 +108,27 @@
 
   <script>
     const duration = 15 * 60;
-    const isFriday = new Date().getDay() === 5;
+    const now = new Date();
+    const isFriday = now.getDay() === 5;
+    const isWeekday = now.getDay() >= 1 && now.getDay() <= 5;
 
-    const universalTimes = [
+    const shift1Times = [
       "08:30", "08:50", "09:10", "09:30",
       ...(isFriday ? ["11:30", "12:15"] : ["11:30", "11:50", "12:10", "12:30"])
     ];
 
+    const shift2Times = [
+      "13:10", "15:15", "15:30", "15:35", "15:50",
+      "15:55", "16:10", "16:15", "16:30",
+      "17:30", "17:50", "17:55", "18:15"
+    ];
+
+    const allTimes = [...shift1Times, ...(isWeekday ? shift2Times : [])];
+
     const departments = [
-      { id: "packing", times: universalTimes },
-      { id: "cigar", times: universalTimes },
-      { id: "technic", times: universalTimes }
+      { id: "packing", times: allTimes },
+      { id: "cigar", times: allTimes },
+      { id: "technic", times: allTimes }
     ];
 
     const jumatanTimes = ["11:30", "12:15"];
