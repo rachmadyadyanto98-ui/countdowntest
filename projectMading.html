@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>300 Tabel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .table-container {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 10px;
+      width: 200px;
+    }
+    th, td {
+      border: 1px solid #333;
+      padding: 5px;
+      text-align: center;
+    }
+    caption {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Menampilkan 300 Tabel</h1>
+  <div class="table-container">
+    <!-- Tabel akan di-generate dengan JavaScript -->
+  </div>
+
+  <script>
+    const container = document.querySelector('.table-container');
+
+    for (let i = 1; i <= 300; i++) {
+      const table = document.createElement('table');
+      const caption = document.createElement('caption');
+      caption.textContent = `Tabel ${i}`;
+      table.appendChild(caption);
+
+      const header = table.insertRow();
+      for (let j = 1; j <= 3; j++) {
+        const th = document.createElement('th');
+        th.textContent = `Kolom ${j}`;
+        header.appendChild(th);
+      }
+
+      for (let r = 1; r <= 3; r++) {
+        const row = table.insertRow();
+        for (let c = 1; c <= 3; c++) {
+          const cell = row.insertCell();
+          cell.textContent = `R${r}C${c}`;
+        }
+      }
+
+      container.appendChild(table);
+    }
+  </script>
+</body>
+</html>
