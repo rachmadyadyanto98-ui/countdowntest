@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Countdown Bobbin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+    }
+    .countdown {
+      font-size: 12vw;
+      font-weight: bold;
+      color: #3399FF;
+      text-shadow: 2px 2px 8px #000;
+      transition: font-size 0.2s;
+      user-select: none;
+    }
+    .countdown-active {
+      font-size: 18vw;
+    }
+    .next-time {
+      font-size: 4vw;
+      margin-top: 2vw;
+      color: #ccc;
+      text-shadow: 1px 1px 4px #000;
+      user-select: none;
+    }
+    .watermark {
+      position: absolute;
+      bottom: 2vw;
+      right: 2vw;
+      font-size: 10vw;
+      font-weight: bold;
+      opacity: 0.12;
+      color: #3399FF;
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+      white-space: nowrap;
+    }
+    @media (max-width: 600px) {
+      .countdown { font-size: 14vw; }
+      .countdown-active { font-size: 22vw; }
+      .next-time { font-size: 5vw; }
+      .watermark { font-size: 16vw; }
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div id="countdown-bobbin" class="countdown">Menunggu...</div>
+    <div id="next-bobbin" class="next-time"></div>
+    <div class="watermark">BOBBIN</div>
+  </div>
+
+  <script>
+    const duration = 15 * 60; // 15 menit
+    const bobbinTimes = [
+      "08:00","08:15","08:30","11:45","12:00","12:15",
+      "15:00","15:10","15:20","15:30","15:40",
+      "17:30","17:50","18:10"
+    ];
+
+    const countdownBobbin = document.getElementById("countdown-bobbin");
+    const nextBobbin = document.getElementById("next-bobbin");
+
+    function parseTimeToDate(timeStr) {
+      const [hour, minute] = timeStr.split(":").map(Number);
+      const date = new Date();
+      date.setHours(hour, minute, 0, 0);
+      return date;
+    }
+
+    function getActiveStart(now, timeList) {
+      for (const timeStr of timeList) {
+        const start = parseTimeToDate(timeStr);
+        const end = new Date(start.getTime() + duration * 1000);
+        if (now >= start && now < end) {
+          return start;
+        }
+      }
+      return null;
+    }
+
+    function getNextStart(now, timeList) {
+      for (const timeStr of timeList) {
+        const start = parseTimeToDate(timeStr);
+        if (now < start) {
+          return timeStr;
+        }
+      }
+      return null;
+    }
+
+    function updateCountdown() {
+      const now = new Date();
+      const bobbinStart = getActiveStart(now, bobbinTimes);
+
+      if (bobbinStart) {
+        countdownBobbin.classList.add("countdown-active");
+        const elapsed = Math.floor((now - bobbinStart) / 1000);
+        const remaining = duration - elapsed;
+        if (remaining >= 0) {
+          const minutes = Math.floor(remaining / 60);
+          const seconds = remaining % 60;
+          countdownBobbin.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+          nextBobbin.textContent = "";
+        } else {
+          countdownBobbin.textContent = "00:00";
+          nextBobbin.textContent = "";
+        }
+      } else {
+        countdownBobbin.classList.remove("countdown-active");
+        const next = getNextStart(now, bobbinTimes);
+        countdownBobbin.textContent = next ? "Menunggu..." : "Selesai";
+        nextBobbin.textContent = next ? `Jam berikutnya: ${next}` : "";
+      }
+    }
+
+    function loop() {
+      updateCountdown();
+      requestAnimationFrame(loop);
+    }
+    loop();
+
+    // Opsional: Cegah layar mati
+    if ('wakeLock' in navigator) {
+      let wakeLock = null;
+      const requestWakeLock = async () => {
+        try { wakeLock = await navigator.wakeLock.request('screen'); }
+        catch (err) {}
+      };
+      requestWakeLock();
+      document.addEventListener('visibilitychange', () => {
+        if (wakeLock !== null && document.visibilityState === 'visible') {
+          requestWakeLock();
+        }
+      });
+    }
+  </script>
+</body>
